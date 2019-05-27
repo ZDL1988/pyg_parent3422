@@ -24,6 +24,7 @@ public interface OrderService {
      * @param out_trade_no      支付单号, payLog支付日志的主键
      * @param transaction_id    交易号, 微信给我们返回的
      */
+<<<<<<< HEAD
   /*  public void updateOrderStatus(String out_trade_no,String transaction_id);*/
 
 
@@ -38,4 +39,10 @@ public interface OrderService {
     public void delete(Long id);
 
     public void updateStatus(Long[] ids, String status);*/
+=======
+    public void updateOrderStatus(String out_trade_no,String transaction_id);
+
+
+    List<Order> findAllByName(String name);
+>>>>>>> origin/master
 }

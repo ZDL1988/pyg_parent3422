@@ -1,13 +1,22 @@
 package cn.itcast.core.service;
 
+import cn.itcast.core.dao.item.ItemDao;
 import cn.itcast.core.dao.log.PayLogDao;
 import cn.itcast.core.dao.order.OrderDao;
 import cn.itcast.core.dao.order.OrderItemDao;
 import cn.itcast.core.pojo.entity.BuyerCart;
+<<<<<<< HEAD
 import cn.itcast.core.pojo.entity.PageResult;
 import cn.itcast.core.pojo.log.PayLog;
 import cn.itcast.core.pojo.order.Order;
 import cn.itcast.core.pojo.order.OrderItem;
+=======
+import cn.itcast.core.pojo.item.Item;
+import cn.itcast.core.pojo.log.PayLog;
+import cn.itcast.core.pojo.order.Order;
+import cn.itcast.core.pojo.order.OrderItem;
+import cn.itcast.core.pojo.order.OrderItemQuery;
+>>>>>>> origin/master
 import cn.itcast.core.pojo.order.OrderQuery;
 import cn.itcast.core.util.Constants;
 import cn.itcast.core.util.IdWorker;
@@ -42,6 +51,8 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private RedisTemplate redisTemplate;
 
+    @Autowired
+    private ItemDao itemDao;
     @Override
     public void add(Order order, List<BuyerCart> cartList) {
         /**
@@ -179,5 +190,40 @@ public class OrderServiceImpl implements OrderService {
 
         Page<Order> ordersList = (Page<Order>)orderDao.selectByExample(query);
         return new PageResult(ordersList.getTotal(),ordersList.getResult());
+    }
+
+    @Override
+    public List<Order> findAllByName(String name) {
+        //根据用户名查询订单
+        OrderQuery orderQuery = new OrderQuery();
+        OrderQuery.Criteria r = orderQuery.createCriteria();
+        r.andUserIdEqualTo(name);
+        List<Order> orders = orderDao.selectByExample(orderQuery);
+
+
+
+
+        //更具订单查询每个订单的 订单详情
+        if (orders!=null&& orders.size()>0){
+            for (Order order : orders) {
+                //通过订单ID查询订单详情  每次循环 更新 条件对象的订单ID
+                //订单详情条件查询对象
+                OrderItemQuery orderItemQuery = new OrderItemQuery();
+                OrderItemQuery.Criteria criteria = orderItemQuery.createCriteria();
+                criteria.andOrderIdEqualTo(order.getOrderId());
+                List<OrderItem> orderItems = orderItemDao.selectByExample(orderItemQuery);
+                //遍历订单详情集合 获取每个详情的
+                if (orderItems != null &&orderItems.size()>0){
+                    order.setOrderItemList(orderItems);
+                    for (OrderItem orderItem : orderItems) {
+
+                        Item items = itemDao.selectByPrimaryKey(orderItem.getItemId());
+                        orderItem.setItem(items);
+                    }
+
+                }
+            }
+        }
+        return orders;
     }
 }
