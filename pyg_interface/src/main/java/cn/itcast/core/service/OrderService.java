@@ -1,6 +1,7 @@
 package cn.itcast.core.service;
 
 import cn.itcast.core.pojo.entity.BuyerCart;
+import cn.itcast.core.pojo.entity.PageResult;
 import cn.itcast.core.pojo.log.PayLog;
 import cn.itcast.core.pojo.order.Order;
 
@@ -23,5 +24,18 @@ public interface OrderService {
      * @param out_trade_no      支付单号, payLog支付日志的主键
      * @param transaction_id    交易号, 微信给我们返回的
      */
-    public void updateOrderStatus(String out_trade_no,String transaction_id);
+  /*  public void updateOrderStatus(String out_trade_no,String transaction_id);*/
+
+
+    public PageResult search(Order order,Integer page,Integer rows);
+
+   /* public void add(OrderEntity orderEntity);
+    public OrderEntity findOne(Long id);
+
+
+    public  void  update(OrderEntity orderEntity);
+
+    public void delete(Long id);
+
+    public void updateStatus(Long[] ids, String status);*/
 }

@@ -4,12 +4,16 @@ import cn.itcast.core.dao.log.PayLogDao;
 import cn.itcast.core.dao.order.OrderDao;
 import cn.itcast.core.dao.order.OrderItemDao;
 import cn.itcast.core.pojo.entity.BuyerCart;
+import cn.itcast.core.pojo.entity.PageResult;
 import cn.itcast.core.pojo.log.PayLog;
 import cn.itcast.core.pojo.order.Order;
 import cn.itcast.core.pojo.order.OrderItem;
+import cn.itcast.core.pojo.order.OrderQuery;
 import cn.itcast.core.util.Constants;
 import cn.itcast.core.util.IdWorker;
 import com.alibaba.dubbo.config.annotation.Service;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
@@ -120,11 +124,11 @@ public class OrderServiceImpl implements OrderService {
         return payLog;
     }
 
-    @Override
+ /* @Override
     public void updateOrderStatus(String out_trade_no, String transaction_id) {
-        /**
-         * 1.修改支付日志支付状态
-         */
+
+         // 1.修改支付日志支付状态
+        //
         PayLog payLog = payLogDao.selectByPrimaryKey(out_trade_no);
         //支付时间
         payLog.setPayTime(new Date());
@@ -134,10 +138,9 @@ public class OrderServiceImpl implements OrderService {
         payLog.setTransactionId(transaction_id);
         //更新支付日志到数据库中
         payLogDao.updateByPrimaryKeySelective(payLog);
-
-        /**
-         * 2.修改订单支付状态
-         */
+//
+        // 2.修改订单支付状态
+        //
         String orderList = payLog.getOrderList();//获取订单号列表
         String[] orderIds = orderList.split(",");//获取订单号数组
         if (orderIds != null) {
@@ -149,10 +152,32 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
-        /**
+        *//**
          * 3. 清除redis缓存中的未支付日志数据
-         */
+         *//*
         redisTemplate.boundHashOps(Constants.REDIS_PAYLOG).delete(payLog.getUserId());
 
+    }*/
+
+    @Override
+    public PageResult search(Order order, Integer page, Integer rows) {
+        PageHelper.startPage(page,rows);
+        //创建查询条件对象
+        OrderQuery query = new OrderQuery();
+        //创建where条件对象
+        OrderQuery.Criteria criteria = query.createCriteria();
+        if(order != null){
+            //根据商家ID模糊查询
+//            if (order.getSellerId() != null && !"".equals(order.getSellerId())){
+//                criteria.andSellerIdLike("%"+order.getSellerId()+"%");
+//            }
+            //根据订单号精确查询
+            if (order.getOrderId() != null && !"".equals(order.getOrderId())){
+                criteria.andOrderIdEqualTo(order.getOrderId());
+            }
+        }
+
+        Page<Order> ordersList = (Page<Order>)orderDao.selectByExample(query);
+        return new PageResult(ordersList.getTotal(),ordersList.getResult());
     }
 }
